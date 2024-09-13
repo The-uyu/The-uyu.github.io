@@ -1,0 +1,723 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="uyu">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="踩坑能手的小记录本">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GraphRAG+本地部署模型">
+<meta property="og:url" content="https://the-uyu.github.io/2024/09/12/%E8%AE%B0%E5%BD%95-GraphRAG-%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%9E%8B/index.html">
+<meta property="og:site_name" content="uyu">
+<meta property="og:description" content="踩坑能手的小记录本">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://the-uyu.github.io/2024/09/12/%E8%AE%B0%E5%BD%95-GraphRAG-%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%9E%8B/%E5%8F%AF%E8%A7%86%E5%8C%96.png">
+<meta property="article:published_time" content="2024-09-12T08:13:32.000Z">
+<meta property="article:modified_time" content="2024-09-12T14:36:10.199Z">
+<meta property="article:author" content="uyu">
+<meta property="article:tag" content="GraphRAG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://the-uyu.github.io/2024/09/12/%E8%AE%B0%E5%BD%95-GraphRAG-%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%9E%8B/%E5%8F%AF%E8%A7%86%E5%8C%96.png">
+  
+  
+  
+  <title>GraphRAG+本地部署模型 - uyu</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"the-uyu.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>UYU</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="GraphRAG+本地部署模型"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-09-12 16:13" pubdate>
+          2024年9月12日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          524 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          5 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">GraphRAG+本地部署模型</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="记录GraphRAG-本地部署模型"><a href="#记录GraphRAG-本地部署模型" class="headerlink" title="记录GraphRAG + 本地部署模型"></a>记录GraphRAG + 本地部署模型</h1><h2 id="GraphRAG-安装"><a href="#GraphRAG-安装" class="headerlink" title="GraphRAG 安装"></a>GraphRAG 安装</h2><p>非常的简单 跟着官方文档即可</p>
+<h2 id="LMStudio方案（失败）"><a href="#LMStudio方案（失败）" class="headerlink" title="LMStudio方案（失败）"></a>LMStudio方案（失败）</h2><p>没有成功</p>
+<p>模型和embedding模型的端口一样都是到v1结尾的端口</p>
+<p>模型名称 到GGUF结尾的文件夹</p>
+<p>但是最后在关系汇总阶段出错，我怀疑是因为这个电脑的GPU不是英伟达显卡</p>
+<h2 id="OLlama方案（成功）"><a href="#OLlama方案（成功）" class="headerlink" title="OLlama方案（成功）"></a>OLlama方案（成功）</h2><h3 id="ollama部署"><a href="#ollama部署" class="headerlink" title="ollama部署"></a>ollama部署</h3><p>OLlmama和LMStudio属于是竞品关系</p>
+<p>这次我把OLlama部署在了服务器</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/ollama/ollama">https://github.com/ollama/ollama</a></p>
+<p><strong>ollama常用命令</strong></p>
+<p>计算机上已下载的模型</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">ollama list</span><br></code></pre></td></tr></table></figure>
+
+<p>启动 Ollama</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">ollama serve</span><br></code></pre></td></tr></table></figure>
+
+<p>进程</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">ollama ps</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="Graphrag-Local-Ollama——rga和ollama适配后的项目"><a href="#Graphrag-Local-Ollama——rga和ollama适配后的项目" class="headerlink" title="Graphrag-Local-Ollama——rga和ollama适配后的项目"></a>Graphrag-Local-Ollama——rga和ollama适配后的项目</h3><p><a target="_blank" rel="noopener" href="https://github.com/TheAiSingularity/graphrag-local-ollama">https://github.com/TheAiSingularity/graphrag-local-ollama</a></p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs vim">初始化目录<br><span class="hljs-built_in">mkdir</span> -<span class="hljs-keyword">p</span> ./ragtest/<span class="hljs-built_in">input</span><br><br>复制示例输入<br><span class="hljs-keyword">cp</span> <span class="hljs-built_in">input</span>/* ./ragtest/<span class="hljs-built_in">input</span><br><br>初始化配置文件<br><span class="hljs-keyword">python</span> -<span class="hljs-keyword">m</span> graphrag.<span class="hljs-built_in">index</span> --init --root ./ragtest<br><br>修改配置文件后，建立图索引<br><span class="hljs-keyword">python</span> -<span class="hljs-keyword">m</span> graphrag.<span class="hljs-built_in">index</span> --root ./ragtest<br><br>仅支持全局查询<br><span class="hljs-keyword">python</span> -<span class="hljs-keyword">m</span> graphrag.query --root ./ragtest --method <span class="hljs-keyword">global</span> <span class="hljs-string">&quot;What is machinelearning?&quot;</span><br><br><br>局部查询可以对项目进行进一步的修改<br></code></pre></td></tr></table></figure>
+
+<p><strong>尝试记录</strong></p>
+<ul>
+<li><p>配置 llama3  nojson maxToken：2000</p>
+<p>❌ create_final_community_reports</p>
+</li>
+<li><p>配置 llama3  json maxToken：2000</p>
+<p>🚀 All workflows completed successfully.</p>
+<ul>
+<li><p>提问</p>
+<p>Error parsing search response json</p>
+<p>可能是模型的温度过高导致 开始对ollama模型进行设置</p>
+<p>Ollama modelfile指令详解</p>
+<p><a target="_blank" rel="noopener" href="https://wx.kaifamiao.info/index.php/2024/05/08/ollama-modelfile-zhi-ling-xiang-jie/">https://wx.kaifamiao.info/index.php/2024/05/08/ollama-modelfile-zhi-ling-xiang-jie/</a></p>
+<p>成功得到回答</p>
+</li>
+</ul>
+<p><strong>但是仍然不知道为什么llama3 nojson为什么不行</strong></p>
+</li>
+</ul>
+<h3 id="Ollama-modelfile自定义模型"><a href="#Ollama-modelfile自定义模型" class="headerlink" title="Ollama modelfile自定义模型"></a>Ollama modelfile自定义模型</h3><p>先创建一个文件名xx.modelfile</p>
+<p>然后填入</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">FROM</span> llama3.<span class="hljs-number">1</span><br><br><span class="hljs-comment"># sets the temperature to 1 [higher is more creative, lower is more coherent]</span><br><br><span class="hljs-attribute">PARAMETER</span> temperature <span class="hljs-number">0</span>.<span class="hljs-number">3</span><br><br><span class="hljs-comment"># sets the context window size to 4096, this controls how many tokens the LLM can use as context to generate the next token</span><br><br><span class="hljs-comment">#PARAMETER num_ctx 4096</span><br><br><br><br><span class="hljs-comment"># sets a custom system message to specify the behavior of the chat assistant</span><br><br><span class="hljs-comment">#SYSTEM You are Mario from super mario bros, acting as an assistant.</span><br></code></pre></td></tr></table></figure>
+
+<p>运行命令创建模型</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">ollama <span class="hljs-built_in">create</span> myllama3 <span class="hljs-comment">--file myllama3.modelfile</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="可视化图文件"><a href="#可视化图文件" class="headerlink" title="可视化图文件"></a>可视化图文件</h3><p>需要修改配置文件中的</p>
+<p><img src="/2024/09/12/%E8%AE%B0%E5%BD%95-GraphRAG-%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%9E%8B/%E5%8F%AF%E8%A7%86%E5%8C%96.png" srcset="/img/loading.gif" lazyload alt="可视化"></p>
+<p>在根目录创建脚本</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">from</span> pygraphml <span class="hljs-keyword">import</span> GraphMLParser<br>parser = GraphMLParser()<br>g = <span class="hljs-keyword">parser</span>.parse(&quot;./graphrag-local-ollama/ragtest/output/***/artifacts/summarized_graph.graphml&quot;)<br>g.<span class="hljs-keyword">show</span>()<br></code></pre></td></tr></table></figure>
+
+<p>之后可以得到一个html文件，用浏览器打开即可拖动</p>
+<p>说实话我没看懂这个节点的意思</p>
+<h2 id="参考博客"><a href="#参考博客" class="headerlink" title="参考博客"></a>参考博客</h2><p><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/1575047">https://developer.aliyun.com/article/1575047</a></p>
+<h2 id="不同模型的回答对比"><a href="#不同模型的回答对比" class="headerlink" title="不同模型的回答对比"></a>不同模型的回答对比</h2><h3 id="qwen"><a href="#qwen" class="headerlink" title="qwen"></a>qwen</h3><blockquote>
+<p>  Machine Learning refers to a subset of artificial intelligence that enables systems to learn and improve from experience without explicit programming [Data: Reports (1)]. It is primarily used for statistical analysis, data analysis, and prediction.</p>
+<p>  One type of machine learning algorithm, Convolutional Neural Networks (CNNs), are particularly effective in processing grid-like data such as images [Data: Reports (1)]. They are widely employed in various fields including Medical Imaging, Autonomous Vehicles, Natural Language Processing, Video Analysis, and Facial Recognition Systems.</p>
+<p>  In the field of Medical Imaging, CNNs have led to improved diagnostic accuracy and reduced human error by analyzing X-rays, MRIs, and CT scans [Data: Reports (1)]. In Autonomous Vehicles, CNNs are used for tasks like lane detection and obstacle recognition, which could significantly reduce accidents caused by human error, making roads safer [Data: Reports (1)].</p>
+<p>  However, concerns about privacy and security persist as autonomous vehicles collect vast amounts of data. Similarly, the use of CNNs in various applications raises privacy concerns due to the potential for mass surveillance [Data: Reports (+more)]. It is crucial to address these issues to ensure the responsible use of this technology.</p>
+</blockquote>
+<h3 id="llama3-1"><a href="#llama3-1" class="headerlink" title="llama3.1"></a>llama3.1</h3><blockquote>
+<p>:<strong>Machine Learning: A Subset of Artificial Intelligence</strong></p>
+<p>Machine learning is a subset of artificial intelligence (AI) that involves training algorithms on data to enable them to make predictions or decisions without being explicitly programmed.</p>
+<p><strong>Key Characteristics</strong></p>
+<p>Machine learning can be used for tasks such as image and speech recognition, natural language processing, and predictive analytics. It has several key characteristics:</p>
+<ul>
+<li><strong>Data-driven</strong>: Machine learning models are trained on large datasets to learn patterns and relationships.</li>
+<li><strong>Algorithmic</strong>: Machine learning algorithms are designed to make predictions or decisions based on the data they’ve been trained on.</li>
+<li><strong>Adaptive</strong>: Machine learning models can adapt to new data and improve their performance over time.</li>
+</ul>
+<p><strong>Applications</strong></p>
+<p>Machine learning has a wide range of applications, including:</p>
+<ul>
+<li><strong>Image recognition</strong>: Machine learning algorithms can be used to recognize objects in images, such as faces or products.</li>
+<li><strong>Speech recognition</strong>: Machine learning algorithms can be used to transcribe spoken language into text.</li>
+<li><strong>Predictive analytics</strong>: Machine learning algorithms can be used to make predictions about future events or trends.</li>
+</ul>
+<p><strong>Data References</strong></p>
+<p>Machine learning is a powerful tool for analyzing and making decisions based on data. Some relevant data references include:</p>
+<ul>
+<li>Reports (1, 3)</li>
+<li>Entities (35)</li>
+</ul>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/GraphRAG/" class="print-no-link">#GraphRAG</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>GraphRAG+本地部署模型</div>
+      <div>https://the-uyu.github.io/2024/09/12/记录-GraphRAG-本地部署模型/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>uyu</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年9月12日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/07/26/hello-world/" title="Hello World">
+                        <span class="hidden-mobile">Hello World</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
